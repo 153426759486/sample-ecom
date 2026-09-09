@@ -14,6 +14,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # =========================
+      # CHECKOUT
+      # =========================
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -67,7 +71,7 @@ jobs:
           echo "Owner ID: ${{ github.repository_owner_id }}"
 
       # =========================
-      # AWS
+      # AWS CREDENTIALS
       # =========================
 
       - name: Configure AWS credentials
@@ -75,6 +79,14 @@ jobs:
         with:
           role-to-assume: ${{ vars.AWS_ROLE_ARN }}
           aws-region: ap-south-1
+
+      # =========================
+      # FRONTEND DEPLOYMENT
+      # =========================
+
+      - name: Upload frontend to S3
+        run: |
+          aws s3 sync frontend/build/ s3://sample-ecom-frontend-aman-2026 --delete
 
       # =========================
       # BACKEND DEPLOYMENT
