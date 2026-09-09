@@ -12,7 +12,10 @@ import java.util.List;
 
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = {
+        "http://localhost:3000",
+        "http://sample-ecom-frontend-aman-2026.s3-website.ap-south-1.amazonaws.com"
+})
 @RequestMapping("/seller")
 public class SellerController {
 
