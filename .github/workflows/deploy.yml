@@ -1,62 +1,60 @@
-  ```yaml
-  name: Deploy Spring Boot to Elastic Beanstalk
+name: Deploy Spring Boot to Elastic Beanstalk
 
-  on:
-    push:
-      branches:
-        - main
+on:
+  push:
+    branches:
+      - main
 
-  permissions:
-    id-token: write
-    contents: read
+permissions:
+  id-token: write
+  contents: read
 
-  jobs:
-    build-and-deploy:
-      runs-on: ubuntu-latest
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
 
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-        - name: Set up Java
-          uses: actions/setup-java@v4
-          with:
-            java-version: '25'
-            distribution: 'temurin'
-            cache: maven
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
 
-        - name: Build Spring Boot application
-          run: mvn clean package -DskipTests
+      - name: Build Spring Boot application
+        run: mvn clean package -DskipTests
 
-        - name: Configure AWS credentials
-          uses: aws-actions/configure-aws-credentials@v4
-          with:
-            role-to-assume: ${{ vars.AWS_ROLE_ARN }}
-            aws-region: ap-south-1
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ap-south-1
 
-        - name: Create deployment package
-          run: |
-            mkdir deploy
-            cp target/*.jar deploy/application.jar
-            cd deploy
-            zip ../application.zip application.jar
+      - name: Create deployment package
+        run: |
+          mkdir deploy
+          cp target/*.jar deploy/application.jar
+          cd deploy
+          zip ../application.zip application.jar
 
-        - name: Upload package to S3
-          run: |
-            aws s3 cp application.zip \
-              s3://elasticbeanstalk-ap-south-1-560428233896/application-${GITHUB_SHA}.zip
+      - name: Upload package to S3
+        run: |
+          aws s3 cp application.zip \
+            s3://elasticbeanstalk-ap-south-1-560428233896/application-${GITHUB_SHA}.zip
 
-        - name: Create Elastic Beanstalk application version
-          run: |
-            aws elasticbeanstalk create-application-version \
-              --application-name sample-ecom \
-              --version-label ${GITHUB_SHA} \
-              --source-bundle S3Bucket=elasticbeanstalk-ap-south-1-560428233896,S3Key=application-${GITHUB_SHA}.zip
+      - name: Create Elastic Beanstalk application version
+        run: |
+          aws elasticbeanstalk create-application-version \
+            --application-name sample-ecom \
+            --version-label ${GITHUB_SHA} \
+            --source-bundle S3Bucket=elasticbeanstalk-ap-south-1-560428233896,S3Key=application-${GITHUB_SHA}.zip
 
-        - name: Deploy to Elastic Beanstalk
-          run: |
-            aws elasticbeanstalk update-environment \
-              --application-name sample-ecom \
-              --environment-name sample-ecom-env \
-              --version-label ${GITHUB_SHA}
-    ```
+      - name: Deploy to Elastic Beanstalk
+        run: |
+          aws elasticbeanstalk update-environment \
+            --application-name sample-ecom \
+            --environment-name sample-ecom-env \
+            --version-label ${GITHUB_SHA}
